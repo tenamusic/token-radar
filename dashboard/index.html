@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Token Launch Radar — pre-token protocols ranked by implied value</title>
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<header class="masthead">
+  <div class="masthead-in">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true"><span></span></div>
+      <div>
+        <h1>Token Launch Radar</h1>
+        <p class="tagline">Protocols whose token does not exist yet, ranked by what that token would be worth if it launched on today's record.</p>
+      </div>
+    </div>
+    <div class="mast-stats" id="mastStats"></div>
+  </div>
+</header>
+
+<section class="model-strip" id="modelStrip" aria-label="The value model in one line"></section>
+
+<section class="controls" aria-label="Board controls">
+  <div class="controls-in">
+    <label class="ctl ctl-grow">Search
+      <input id="q" type="search" placeholder="Name or slug…" autocomplete="off">
+    </label>
+    <label class="ctl">Category
+      <select id="fCategory"></select>
+    </label>
+    <label class="ctl">Chain
+      <select id="fChain"></select>
+    </label>
+    <label class="ctl">Min TVL
+      <select id="fTvl">
+        <option value="0">Any size</option>
+        <option value="50000000">$50M+</option>
+        <option value="100000000">$100M+</option>
+        <option value="250000000">$250M+</option>
+        <option value="1000000000">$1B+</option>
+      </select>
+    </label>
+    <label class="ctl">Sort by
+      <select id="fSort">
+        <option value="rank">Rank (implied value)</option>
+        <option value="tvl">TVL</option>
+        <option value="growth">7-day growth</option>
+        <option value="age">Age without a token</option>
+        <option value="name">Name</option>
+      </select>
+    </label>
+    <label class="ctl ctl-check">
+      <input id="fWatch" type="checkbox"> Watchlist only
+    </label>
+    <div class="ctl-count" id="rowCount" role="status"></div>
+  </div>
+</section>
+
+<main class="layout">
+  <section class="board-wrap" aria-label="Ranked board">
+    <table class="board" id="boardTable">
+      <thead>
+        <tr>
+          <th class="num">#</th>
+          <th>Protocol</th>
+          <th>Category</th>
+          <th class="num">Chains</th>
+          <th class="num">TVL</th>
+          <th class="num">7d</th>
+          <th class="num">Age</th>
+          <th class="num">Implied value</th>
+        </tr>
+      </thead>
+      <tbody id="boardBody"></tbody>
+    </table>
+    <p class="empty" id="emptyMsg" hidden>No protocol matches those filters. Loosen one and the radar sweeps again.</p>
+  </section>
+
+  <aside class="detail" id="detail" aria-label="Protocol detail"></aside>
+</main>
+
+<section class="live" aria-label="Already trading">
+  <div class="section-in">
+    <h2>Already trading — kept off the board</h2>
+    <p class="section-note">These protocols already have a token, so the radar does not rank them or guess at their value: the market has one. They are shown because their market-cap / TVL ratios are exactly what prices each category's multiple on the board above.</p>
+    <table class="live-table" id="liveTable">
+      <thead>
+        <tr><th>Protocol</th><th>Symbol</th><th>Category</th><th class="num">TVL</th><th class="num">Market cap</th><th class="num">MCap / TVL</th><th class="num">7d</th></tr>
+      </thead>
+      <tbody id="liveBody"></tbody>
+    </table>
+  </div>
+</section>
+
+<section class="model" aria-label="The value model">
+  <div class="section-in">
+    <h2>The model, stated in full <span class="model-ver" id="modelVer"></span></h2>
+    <div class="model-grid">
+      <div>
+        <pre class="formula">implied value = TVL x category multiple
+              x growth factor
+              x vintage factor
+              x reach factor</pre>
+        <ul class="factor-list">
+          <li><strong>Category multiple</strong> — the median market-cap / TVL of this snapshot's own tokenised protocols in the same category (at least 2 peers, else the all-category median), clamped to 0.20–2.50.</li>
+          <li><strong>Growth factor</strong> — 1 + clamp(7-day TVL change, −50%, +100%) × 0.60. Momentum is marked up, decline marked down, extremes capped.</li>
+          <li><strong>Vintage factor</strong> — 0.80 + 0.45 × min(days live without a token, 1460) / 1460. Years at scale with no token means more accrued value to launch into. Unknown listing date counts as one year.</li>
+          <li><strong>Reach factor</strong> — 1 + 0.03 × extra chains, up to +30%. Distribution supports a higher launch value.</li>
+        </ul>
+        <p class="section-note">One function scores every row from the snapshot's own fields; no protocol name is special-cased. Every row carries its four factors, and the detail view recomputes the multiplication in front of you.</p>
+      </div>
+      <div>
+        <h3>Category multiples from tokenised peers</h3>
+        <table class="mult-table" id="multTable">
+          <thead><tr><th>Category</th><th class="num">Multiple</th><th class="num">Peers</th></tr></thead>
+          <tbody id="multBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="foot">
+  <p>Built from one sealed DefiLlama snapshot: the board is a model's claim about a launch that has not happened, not a prediction that it will. Farm plans are starting points — check the protocol's own pages before committing funds.</p>
+</footer>
+
+<script src="../data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
