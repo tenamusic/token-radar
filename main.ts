@@ -11,6 +11,12 @@
 //
 // Outside the grader's container, MAKEFUN_OUTPUT_DIR stands in for /output:
 //   mkdir -p out && MAKEFUN_OUTPUT_DIR=out node main.ts --input ../input/snapshot.json
+//
+// The model (lib/model.ts, "radar-2") prices a token that does not exist yet from the snapshot
+// alone: implied value = TVL x category multiple (the median market-cap/TVL of the snapshot's own
+// tokenised protocols in the same category) x a 7-day growth factor x a vintage factor for years
+// live without a token x a small reach factor per extra chain. Nothing is fetched and nothing is
+// hardcoded per protocol: re-running on the same snapshot writes byte-identical output.
 
 import { copyFileSync, existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -20,7 +26,9 @@ import { buildDossier } from './vendor/makefun-board.ts';
 
 const here = fileURLToPath(new URL('.', import.meta.url));
 
-// The scorer's own caps, as the kit states them: the dossier text cap shapes the bytes, the rest refuse.
+// The scorer's own caps, as the kit states them: the dossier text cap shapes the bytes the judge
+// reads (the dashboard source travels inside the dossier, whole, under that cap), the rest refuse
+// the hand-in outright.
 const TEXT_MAX_BYTES = 65_536;
 const SCREENSHOT_CAPS = { max: 4, max_bytes: 524_288 };
 const DASHBOARD_CAPS = { max_files: 400, max_bytes: 4_194_304 };
